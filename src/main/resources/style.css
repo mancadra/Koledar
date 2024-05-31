@@ -1,0 +1,28 @@
+.header {
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-alignment: center;
+}
+
+.calendar-grid {
+    -fx-padding: 10;
+    -fx-hgap: 5;
+    -fx-vgap: 5;
+}
+
+.label-day {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.sunday {
+    -fx-text-fill: red;
+}
+
+.holiday {
+    -fx-background-color: green;
+}
+
+.combo-box, .text-field, .button {
+    -fx-font-size: 14px;
+}
