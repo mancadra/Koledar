@@ -14,6 +14,8 @@ public class Calendar {
         this.holidays = holidays;
     }
 
+
+    // returns the number of days in a given month
     public int getDaysInMonth() {
         switch(month) {
             case 4: case 6: case 9: case 11:
@@ -31,10 +33,12 @@ public class Calendar {
         }
     }
 
+
     // A year is a leap year if it is divisible with four but at the same time not divisible with 100 or if it is divisible with 400
     public boolean isLeapYear(int year) {
         return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
+
 
     // returns the day of the week for the first day of the month (May 1st 2024 was a Wednesday --> 2)
     public int firstDayOfTheMonth() {
@@ -42,6 +46,8 @@ public class Calendar {
         return (firstDay.getDayOfWeek().getValue() - 1); // numeric value of the enum
     }
 
+
+    // returns true if given date is a holiday
     public boolean isHoliday(int day) {
         LocalDate date = LocalDate.of(year, month, day);
         for (Holiday holiday : holidays) {

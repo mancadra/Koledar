@@ -19,6 +19,8 @@ public class Holiday {
         return annual;
     }
 
+
+    // checks if the objects are the same
     public boolean equalDates(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;

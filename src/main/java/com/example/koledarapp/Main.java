@@ -1,12 +1,15 @@
 package com.example.koledarapp;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
 import java.io.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -44,9 +47,11 @@ public class Main extends Application {
 
         dayNameLabel = new Label();
         updateDayNameLabel(LocalDate.now());
+        dayNameLabel.getStyleClass().add("regular-text");
 
         dateInputField = new TextField();
         updateDateInputField(LocalDate.now());
+        dateInputField.getStyleClass().add("input-field");
         dateInputField.setOnAction(e -> updateCalendarFromDateInput());
 
         HBox dateInputContainer = new HBox(10);
@@ -62,15 +67,17 @@ public class Main extends Application {
         monthComboBox.getItems().addAll(monthName);
         monthComboBox.setValue(monthName[LocalDate.now().getMonthValue()- 1]);
         yearField.setText(String.valueOf(LocalDate.now().getYear()));
+        monthComboBox.getStyleClass().add("input-field");
 
-        // if we change the month in the combo box the input date text gets reset to todays date
+        // if we change the month in the combo box the input date text gets reset to today's date
         monthComboBox.setOnAction(e -> {
-            if (!updatingFromDateInput) { // only if its changed from the combobox and not when we chamge the values in combo-box and yearTextField according to the date input
+            if (!updatingFromDateInput) { // only if it's changed from the combobox and not when we change the values in combo-box and yearTextField according to the date input
                 resetDateInputFieldToToday();
                 updateCalendar();
             }
             updatingFromDateInput = false;
         });
+
         yearField.setOnAction(e -> {
             if (!updatingFromDateInput) {
                 resetDateInputFieldToToday();
@@ -85,6 +92,7 @@ public class Main extends Application {
                 yearField.setText(newValue.replaceAll("[^\\d]", ""));
             }
         });
+        yearField.getStyleClass().add("input-field");
 
         // dateInputField accepts numbers, space and fullstops only
         dateInputField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -100,22 +108,26 @@ public class Main extends Application {
         calendarGrid.setHgap(5);
         calendarGrid.setVgap(5);
         calendarGrid.setAlignment(Pos.CENTER);
-        calendarGrid.getStyleClass().add("calendar-grid");
 
         topContainer.getChildren().addAll(dateInputContainer, header);
+        topContainer.getStyleClass().add("header");
         root.setTop(topContainer);
         root.setCenter(calendarGrid);
 
         updateCalendar();
 
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 500, 600);
         scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        scene.getRoot().getStyleClass().add("root");
 
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/icon.png")));
         stage.setScene(scene);
         stage.setTitle("Koledar");
         stage.show();
     }
 
+
+    // updates the calendar grid according to the value in month combo-box and yearField
     private void updateCalendar() {
         calendarGrid.getChildren().clear();
 
@@ -128,11 +140,17 @@ public class Main extends Application {
         int daysInMonth = calendar.getDaysInMonth();
         int firstDayInMonth = calendar.firstDayOfTheMonth();
 
-        String[] daysOfWeek = {"pon.", "tor.", "sre.", "čet.", "pet.", "sob.", "ned."};
+        String[] daysOfWeek = {"PON", "TOR", "SRE", "ČET", "PET", "SOB", "NED"};
         for (int i = 0; i < 7; i++) {
             Label label = new Label(daysOfWeek[i]);
+            label.setMinWidth(40);
+            label.setMinHeight(40);
+            label.setStyle("-fx-alignment: center;");
             if (i == 6) label.getStyleClass().add("sunday");
-
+            else {
+                label.getStyleClass().add("other-days");
+            }
+            GridPane.setMargin(label, new Insets(8));
             calendarGrid.add(label, i, 0);
         }
 
@@ -142,22 +160,31 @@ public class Main extends Application {
             int col = i % 7;
 
             Label dayLabel = new Label(String.valueOf(day));
+            dayLabel.setMinWidth(40);
+            dayLabel.setMinHeight(40);
+            dayLabel.setStyle("-fx-alignment: center;");
 
             // colouring of sundays
             if (col == 6) {
                 dayLabel.getStyleClass().add("sunday");
             }
-            if (calendar.isHoliday(day)) {
+            else if (calendar.isHoliday(day)) {
                 dayLabel.getStyleClass().add("holiday");
+                if (col == 6) {
+                    dayLabel.getStyleClass().add("holiday-sunday");
+                }
+            } else {
+                dayLabel.getStyleClass().add("label-day");
             }
-
+            GridPane.setMargin(dayLabel, new Insets(8));
             calendarGrid.add(dayLabel, col, row);
             day++;
         }
     }
 
-    private void updateCalendarFromDateInput() {
 
+    // updates the calendar grid and the combo-box value for the month and yearField based on the input in dateInputField
+    private void updateCalendarFromDateInput() {
         try {
             updatingFromDateInput = true;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. M. yyyy", new Locale("sl"));
@@ -175,21 +202,29 @@ public class Main extends Application {
         }
     }
 
+
+    // when choosing a month in combo-box or year in yearField we call this function to reset the dateInputField and dayNameLabel to todays date
     private void resetDateInputFieldToToday() {
         updateDateInputField(LocalDate.now());
         updateDayNameLabel(LocalDate.now());
     }
 
+
+    // updates the date in the dateInputField
     private void updateDateInputField(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. M. yyyy", new Locale("sl"));
         dateInputField.setText(date.format(formatter));
     }
 
+
+    // updates the name of the day, for the choosen date in dateInputField
     private void updateDayNameLabel(LocalDate date) {
         String dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("sl"));
         dayNameLabel.setText(dayName + ", ");
     }
 
+
+    // Reads holidays from the .txt file and adds them to the holidays hashset
     private Set<Holiday> loadHolidays(String fileName) {
         Set<Holiday> holidays = new HashSet<>();
         try(InputStream inputStream = getClass().getResourceAsStream("/" + fileName); BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
